@@ -1,0 +1,40 @@
+-- Step 1: Insert Records
+-- Insert records into Dept table
+INSERT INTO Dept (deptId, deptName) VALUES (10, 'HR');
+INSERT INTO Dept (deptId, deptName) VALUES (20, 'IT');
+INSERT INTO Dept (deptId, deptName) VALUES (30, 'Finance');
+INSERT INTO Dept (deptId, deptName) VALUES (40, 'Marketing');
+
+-- Insert records into Emp table
+INSERT INTO Emp (empId, empName, empSal, empDeptId) VALUES (101, 'John', 25000, 30);
+INSERT INTO Emp (empId, empName, empSal, empDeptId) VALUES (102, 'Alice', 22000, 40);
+INSERT INTO Emp (empId, empName, empSal, empDeptId) VALUES (103, 'Bob', 18000, 10);
+INSERT INTO Emp (empId, empName, empSal, empDeptId) VALUES (104, 'Charlie', 15000, 30);
+INSERT INTO Emp (empId, empName, empSal, empDeptId) VALUES (105, 'David', 30000, 20);
+INSERT INTO Emp (empId, empName, empSal, empDeptId) VALUES (106, 'Eve', 28000, 40);
+INSERT INTO Emp (empId, empName, empSal, empDeptId) VALUES (107, 'Frank', 27000, 30);
+INSERT INTO Emp (empId, empName, empSal, empDeptId) VALUES (108, 'Grace', 35000, 20);
+
+-- Step 2: Employees in Department 30, 40, or 10
+SELECT empId, empName, empSal, empDeptId
+FROM Emp
+WHERE empDeptId IN (30, 40, 10);
+
+-- Step 3: Employees whose Salary is Between 10000 and 30000
+SELECT empId, empName, empSal, empDeptId
+FROM Emp
+WHERE empSal BETWEEN 10000 AND 30000;
+
+-- Step 4: Total Number of Employees
+SELECT COUNT(*) AS total_employees
+FROM Emp;
+
+-- Step 5: Average Salary of Each Department
+SELECT empDeptId, AVG(empSal) AS avg_salary
+FROM Emp
+GROUP BY empDeptId;
+
+-- Step 6: Employees in Ascending Order of Salary
+SELECT empId, empName, empSal, empDeptId
+FROM Emp
+ORDER BY empSal ASC;
