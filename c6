@@ -1,0 +1,86 @@
+-- 1. Create tables
+CREATE TABLE employee (
+    employee_name VARCHAR(50),
+    street VARCHAR(100),
+    city VARCHAR(50),
+    PRIMARY KEY (employee_name)
+);
+
+CREATE TABLE works (
+    employee_name VARCHAR(50),
+    company_name VARCHAR(50),
+    salary INT,
+    PRIMARY KEY (employee_name, company_name),
+    FOREIGN KEY (employee_name) REFERENCES employee(employee_name)
+);
+
+CREATE TABLE company (
+    company_name VARCHAR(50),
+    city VARCHAR(50),
+    PRIMARY KEY (company_name)
+);
+
+CREATE TABLE manages (
+    employee_name VARCHAR(50),
+    manager_name VARCHAR(50),
+    PRIMARY KEY (employee_name),
+    FOREIGN KEY (employee_name) REFERENCES employee(employee_name)
+);
+
+-- 2. Insert sample data
+INSERT INTO employee (employee_name, street, city)
+VALUES 
+('John Doe', '123 Oak St', 'New York'),
+('Jane Smith', '456 Pine St', 'Los Angeles'),
+('Alice Johnson', '789 Maple St', 'Chicago'),
+('Bob Brown', '101 Birch St', 'Miami'),
+('Charlie White', '202 Cedar St', 'San Francisco');
+
+INSERT INTO works (employee_name, company_name, salary)
+VALUES
+('John Doe', 'First Bank Corporation', 12000),
+('Jane Smith', 'First Bank Corporation', 18000),
+('Alice Johnson', 'Tech Solutions', 15000),
+('Bob Brown', 'First Bank Corporation', 22000),
+('Charlie White', 'Tech Solutions', 25000);
+
+INSERT INTO company (company_name, city)
+VALUES
+('First Bank Corporation', 'New York'),
+('Small Bank Corporation', 'Los Angeles'),
+('Tech Solutions', 'San Francisco');
+
+INSERT INTO manages (employee_name, manager_name)
+VALUES
+('John Doe', 'Mary Brown'),
+('Jane Smith', 'John Doe'),
+('Alice Johnson', 'Tom Harris'),
+('Bob Brown', 'Alice Johnson'),
+('Charlie White', 'Bob Brown');
+
+-- 3. Query 1: List employees from ‘First Bank Corporation’ that earn salary more than all employees of ‘Small Bank Corporation’
+SELECT e.employee_name
+FROM employee e
+JOIN works w ON e.employee_name = w.employee_name
+WHERE w.company_name = 'First Bank Corporation'
+AND w.salary > ALL (
+    SELECT salary
+    FROM works
+    WHERE company_name = 'Small Bank Corporation'
+);
+
+-- 4. Query 2: Create a view that will display employee details along with name of his/her manager
+CREATE VIEW employee_with_manager AS
+SELECT e.employee_name, e.street, e.city, m.manager_name
+FROM employee e
+JOIN manages m ON e.employee_name = m.employee_name;
+
+-- 5. Query 3: Display employee details that live in cities Pune, Mumbai, and Nasik
+SELECT employee_name, street, city
+FROM employee
+WHERE city IN ('Pune', 'Mumbai', 'Nasik');
+
+-- 6. Query 4: Give employees of ‘First Bank Corporation’ 15% rise if salary is less than 20000
+UPDATE works
+SET salary = salary * 1.15
+WHERE company_name = 'First Bank Corporation' AND salary < 20000;
