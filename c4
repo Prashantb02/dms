@@ -30,9 +30,10 @@ SELECT COUNT(*) AS total_employees
 FROM Emp;
 
 -- Step 5: Average Salary of Each Department
-SELECT empDeptId, AVG(empSal) AS avg_salary
-FROM Emp
-GROUP BY empDeptId;
+SELECT D.deptName, E.empDeptId, AVG(E.empSal) AS avg_salary
+FROM Emp E
+JOIN Dept D ON E.empDeptId = D.deptId
+GROUP BY E.empDeptId, D.deptName;
 
 -- Step 6: Employees in Ascending Order of Salary
 SELECT empId, empName, empSal, empDeptId
