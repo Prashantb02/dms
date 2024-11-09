@@ -1,0 +1,41 @@
+CREATE TABLE Student (
+    stud_id INT PRIMARY KEY,
+    deptnm VARCHAR(50),
+    sem INT,
+    name VARCHAR(100),
+    yr INT,
+    credits INT
+);
+CREATE TABLE Teaches (
+    teacher_id INT PRIMARY KEY,
+    teacher_name VARCHAR(100),
+    salary DECIMAL(10, 2),
+    deptnm VARCHAR(50)
+);
+INSERT INTO Student (stud_id, deptnm, sem, name, yr, credits)
+VALUES
+(1, 'CSE', 1, 'Alice Johnson', 2024, 20),
+(2, 'IT', 2, 'Bob Smith', 2023, 15),
+(3, 'CSE', 3, 'Cathy Brown', 2023, 18),
+(4, 'ECE', 1, 'David Miller', 2024, 16);
+INSERT INTO Teaches (teacher_id, teacher_name, salary, deptnm)
+VALUES
+(101, 'Dr. Andrew White', 3500.00, 'CSE'),
+(102, 'Dr. Susan Green', 2800.00, 'IT'),
+(103, 'Dr. Kevin Brown', 2200.00, 'ECE'),
+(104, 'Dr. Rachel Black', 1800.00, 'CSE');
+UPDATE Student
+SET deptnm = 'IT'
+WHERE deptnm = 'CSE';
+SELECT deptnm, AVG(salary) AS avg_salary
+FROM Teaches
+GROUP BY deptnm
+ORDER BY avg_salary DESC
+LIMIT 1;
+DELETE FROM Teaches
+WHERE salary < 2000;
+SELECT deptnm, SUM(salary) AS total_salary
+FROM Teaches
+GROUP BY deptnm;
+
+
