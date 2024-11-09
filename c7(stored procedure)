@@ -1,0 +1,72 @@
+-- Create the Borrower table
+CREATE TABLE Borrower (
+    Roll_no INT PRIMARY KEY,
+    Name VARCHAR(100),
+    DateofIssue DATE,
+    NameofBook VARCHAR(100),
+    Status CHAR(1) -- 'I' for Issued, 'R' for Returned
+);
+
+-- Create the Fine table
+CREATE TABLE Fine (
+    Roll_no INT,
+    Date DATE,
+    Amt INT,
+    FOREIGN KEY (Roll_no) REFERENCES Borrower(Roll_no) -- Linking to the Borrower table
+);
+-- Insert sample data into Borrower table
+INSERT INTO Borrower (Roll_no, Name, DateofIssue, NameofBook, Status)
+VALUES 
+(101, 'Alice', '2023-10-01', 'Database Systems', 'I'),
+(102, 'Bob', '2023-10-10', 'Operating Systems', 'I'),
+(103, 'Charlie', '2023-10-15', 'Data Structures', 'I'),
+(104, 'Daisy', '2023-09-01', 'Networks', 'R'), -- Already returned
+(105, 'Eve', '2023-09-15', 'Algorithms', 'I');
+
+-- Fine table is initially empty, as it will be populated by the stored procedure when fines are calculated.
+DELIMITER $$
+
+CREATE PROCEDURE calculate_fine(IN in_roll_no INT, IN in_name_of_book VARCHAR(100))
+BEGIN
+    DECLARE v_date_of_issue DATE;
+    DECLARE v_status CHAR(1);
+    DECLARE v_days INT;
+    DECLARE v_fine_amt INT DEFAULT 0;
+    DECLARE fine_error CONDITION FOR SQLSTATE '45000';
+
+    -- Get the issue date and status of the book
+    SELECT DateofIssue, Status INTO v_date_of_issue, v_status
+    FROM Borrower
+    WHERE Roll_no = in_roll_no AND NameofBook = in_name_of_book;
+
+    -- Check if the book is still issued
+    IF v_status = 'I' THEN
+        -- Calculate the number of days since the book was issued
+        SET v_days = DATEDIFF(CURDATE(), v_date_of_issue);
+
+        -- Calculate the fine amount based on the number of days
+        IF v_days > 15 AND v_days <= 30 THEN
+            SET v_fine_amt = v_days * 5;
+        ELSEIF v_days > 30 THEN
+            SET v_fine_amt = (30 * 5) + ((v_days - 30) * 50);
+        END IF;
+
+        -- If a fine is applicable, insert details into the Fine table
+        IF v_fine_amt > 0 THEN
+            INSERT INTO Fine (Roll_no, Date, Amt)
+            VALUES (in_roll_no, CURDATE(), v_fine_amt);
+        END IF;
+
+        -- Update the status of the book to 'R' (Returned)
+        UPDATE Borrower
+        SET Status = 'R'
+        WHERE Roll_no = in_roll_no AND NameofBook = in_name_of_book;
+    ELSE
+        SIGNAL fine_error SET MESSAGE_TEXT = 'The book has already been returned or does not exist.';
+    END IF;
+
+END $$
+
+DELIMITER ;
+-- Calculate fine for Alice's book 'Database Systems'
+CALL calculate_fine(101, 'Database Systems');
