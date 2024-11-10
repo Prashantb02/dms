@@ -1,0 +1,56 @@
+-- Create borrower table
+CREATE TABLE borrower2 (
+    rollin INT,
+    name VARCHAR(30),
+    dateofissue DATE,
+    nameofbook VARCHAR(30),
+    status CHAR(10)
+);
+
+-- Insert sample data into borrower table
+INSERT INTO borrower2 VALUES 
+(101, 'abc', '2017-07-16', 'dbms', 'r'), 
+(102, 'abc1', '2017-07-16', 'cn', 'i'),
+(103, 'abc3', '2017-07-18', 'toc', 'i'), 
+(104, 'abc4', '2017-07-20', 'ds', 'i'),
+(105, 'abc5', '2017-07-23', 'daa', 'r'), 
+(106, 'nisha', '2017-08-10', 'splm', 'r');
+
+-- Create library_audit table
+CREATE TABLE library_audit (
+    rollin INT,
+    name VARCHAR(30),
+    dateofissue DATE,
+    nameofbook VARCHAR(30),
+    status CHAR(10),
+    ts TIMESTAMP
+);
+
+-- Trigger to insert a record into library_audit after an insert on borrower
+DELIMITER $$
+CREATE TRIGGER after_insert 
+AFTER INSERT ON borrower2 
+FOR EACH ROW
+BEGIN
+    INSERT INTO library_audit (rollin, name, dateofissue, nameofbook, status, ts) 
+    VALUES (NEW.rollin, NEW.name, NEW.dateofissue, NEW.nameofbook, NEW.status, CURRENT_TIMESTAMP);
+END$$
+
+-- Trigger to insert a record into library_audit after a delete on borrower
+CREATE TRIGGER after_delete 
+AFTER DELETE ON borrower2 
+FOR EACH ROW
+BEGIN
+    INSERT INTO library_audit (rollin, name, dateofissue, nameofbook, status, ts) 
+    VALUES (OLD.rollin, OLD.name, OLD.dateofissue, OLD.nameofbook, OLD.status, CURRENT_TIMESTAMP);
+END$$
+
+-- Trigger to insert a record into library_audit after an update on borrower
+CREATE TRIGGER after_update 
+AFTER UPDATE ON borrower2 
+FOR EACH ROW
+BEGIN
+    INSERT INTO library_audit (rollin, name, dateofissue, nameofbook, status, ts) 
+    VALUES (OLD.rollin, OLD.name, OLD.dateofissue, OLD.nameofbook, OLD.status, CURRENT_TIMESTAMP);
+END$$
+DELIMITER ;
