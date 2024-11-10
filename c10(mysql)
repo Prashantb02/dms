@@ -1,0 +1,66 @@
+-- Creating the new roll call table
+CREATE TABLE N_RollCall (
+    roll_number INT,
+    name VARCHAR(10)
+);
+
+-- Creating the old roll call table
+CREATE TABLE O_RollCall (
+    roll_number INT,
+    name VARCHAR(10)
+);
+
+-- Inserting sample data into N_RollCall
+INSERT INTO N_RollCall VALUES (101, 'Alice');
+INSERT INTO N_RollCall VALUES (102, 'Bob');
+INSERT INTO N_RollCall VALUES (103, 'Charlie');
+INSERT INTO N_RollCall VALUES (104, 'Daisy');
+INSERT INTO N_RollCall VALUES (105, 'Eve');
+
+-- Inserting sample data into O_RollCall
+INSERT INTO O_RollCall VALUES (201, 'John');
+INSERT INTO O_RollCall VALUES (202, 'Emily');
+INSERT INTO O_RollCall VALUES (101, 'Alice'); -- Existing entry
+
+DELIMITER //
+
+CREATE PROCEDURE merge_rollcall()
+BEGIN
+    -- Declare a cursor to loop through all records in N_RollCall
+    DECLARE cur_done BOOLEAN DEFAULT FALSE;
+    DECLARE v_roll_number INT;
+    DECLARE v_name VARCHAR(100);
+
+    -- Declare cursor for N_RollCall table
+    DECLARE cur_n_rollcall CURSOR FOR
+        SELECT roll_number, name FROM N_RollCall;
+
+    -- Declare a handler to set done flag when cursor reaches the end
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET cur_done = TRUE;
+
+    -- Open the cursor for N_RollCall
+    OPEN cur_n_rollcall;
+
+    read_loop: LOOP
+        -- Fetch each row into variables
+        FETCH cur_n_rollcall INTO v_roll_number, v_name;
+
+        -- Exit the loop if there are no more rows
+        IF cur_done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Check if the record already exists in O_RollCall
+        IF NOT EXISTS (SELECT 1 FROM O_RollCall WHERE name = v_name) THEN
+            -- Insert the record into O_RollCall if it doesn't exist
+            INSERT INTO O_RollCall (roll_number, name) VALUES (v_roll_number, v_name);
+        END IF;
+    END LOOP;
+
+    -- Close the cursor
+    CLOSE cur_n_rollcall;
+
+END //
+
+DELIMITER ;
+CALL merge_rollcall();
