@@ -1,0 +1,30 @@
+// 1. Create the collection and insert a few documents.
+db.Employee.insertMany([
+    { emp_id: 1, emp_name: "Alice", dept_name: "HR", sal: 45000 },
+    { emp_id: 2, emp_name: "Bob", dept_name: "Finance", sal: 55000 },
+    { emp_id: 3, emp_name: "Charlie", dept_name: "HR", sal: 70000 },
+    { emp_id: 4, emp_name: "David", dept_name: "IT", sal: 85000 },
+    { emp_id: 5, emp_name: "Eve", dept_name: "Finance", sal: 12000 },
+    { emp_id: 6, emp_name: "Frank", dept_name: "HR", sal: 62000 }
+]);
+
+// 2. Find employees having salary greater than 50000.
+db.Employee.find({ sal: { $gt: 50000 } });
+
+// 3. Find employees having salary between 50000 and 80000.
+db.Employee.find({ sal: { $gte: 50000, $lte: 80000 } });
+
+// 4. Find employees having salary more than 60000 from ‘HR’ department.
+db.Employee.find({ dept_name: "HR", sal: { $gt: 60000 } });
+
+// 5. Update salaries of all employees from ‘HR’ department. Set salary to 50000, 
+//    and add new field `increment` with value 10% for all employees in HR department.
+db.Employee.updateMany(
+    { dept_name: "HR" },
+    {
+        $set: { sal: 50000, increment: "10%" }
+    }
+);
+
+// 6. Delete employees from ‘Finance’ department having salary less than 10000.
+db.Employee.deleteMany({ dept_name: "Finance", sal: { $lt: 10000 } });
