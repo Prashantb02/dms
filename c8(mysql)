@@ -1,0 +1,74 @@
+-- Drop tables if they already exist to avoid conflicts during creation
+DROP TABLE IF EXISTS Stud_Marks;
+DROP TABLE IF EXISTS Result;
+
+-- Create Stud_Marks table
+CREATE TABLE Stud_Marks (
+    roll_no INT PRIMARY KEY,
+    name VARCHAR(100),
+    total_marks INT
+);
+
+-- Create Result table
+CREATE TABLE Result (
+    roll_no INT,
+    name VARCHAR(100),
+    class VARCHAR(50)
+);
+
+-- Insert sample data into Stud_Marks table
+INSERT INTO Stud_Marks (roll_no, name, total_marks) VALUES
+(101, 'Alice', 1200),
+(102, 'Bob', 980),
+(103, 'Charlie', 850),
+(104, 'Daisy', 780),
+(105, 'Eve', 1010);
+
+DELIMITER $$
+
+CREATE PROCEDURE proc_grade(
+    IN temp INT,                             -- Input parameter: Roll number
+    OUT p_roll_no INT,                       -- Output parameter: Roll number
+    OUT p_name VARCHAR(100),                 -- Output parameter: Student name
+    OUT p_total INT                          -- Output parameter: Total marks
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR NOT FOUND
+    BEGIN
+        -- Handle the case where no matching row is found
+        SET p_roll_no = NULL;
+        SET p_name = NULL;
+        SET p_total = NULL;
+    END;
+
+    -- Fetch the student's details based on roll number
+    SELECT roll_no, name, total_marks
+    INTO p_roll_no, p_name, p_total
+    FROM Stud_Marks
+    WHERE roll_no = temp;
+
+    -- Determine the class based on total marks and insert into Result table
+    IF p_total IS NOT NULL THEN
+        IF p_total BETWEEN 990 AND 1500 THEN
+            INSERT INTO Result (roll_no, name, class) VALUES (p_roll_no, p_name, 'distinction');
+        ELSEIF p_total BETWEEN 900 AND 989 THEN
+            INSERT INTO Result (roll_no, name, class) VALUES (p_roll_no, p_name, 'first class');
+        ELSEIF p_total BETWEEN 825 AND 899 THEN
+            INSERT INTO Result (roll_no, name, class) VALUES (p_roll_no, p_name, 'HSC');
+        ELSE
+            INSERT INTO Result (roll_no, name, class) VALUES (p_roll_no, p_name, 'fail');
+        END IF;
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Testing the procedure with a specified roll number
+-- Replace '101' with the desired roll number
+CALL proc_grade(101, @p_roll_no, @p_name, @p_total);
+
+-- Retrieve output values from session variables
+SELECT @p_roll_no AS roll_no, @p_name AS name, @p_total AS total_marks;
+
+-- Check the result in the Result table
+SELECT * FROM Result;
