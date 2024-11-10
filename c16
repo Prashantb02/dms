@@ -1,0 +1,41 @@
+// 1. Insert Documents
+db.Book.insertMany([
+    { Title: "MongoDB Basics", Description: "An introduction to MongoDB", Author: "John Doe", Publisher: "TechPress", URL: "http://example.com/mongodb_basics", no_of_likes: 150 },
+    { Title: "Advanced MongoDB", Description: "Deep dive into MongoDB", Author: "John Doe", Publisher: "TechPress", URL: "http://example.com/advanced_mongodb", no_of_likes: 200 },
+    { Title: "Learning MongoDB", Description: "Beginner's guide to MongoDB", Author: "Jane Smith", Publisher: "LearnBooks", URL: "http://example.com/learning_mongodb", no_of_likes: 180 },
+    { Title: "MongoDB Patterns", Description: "Design patterns for MongoDB", Author: "Jane Smith", Publisher: "LearnBooks", URL: "http://example.com/mongodb_patterns", no_of_likes: 220 },
+    { Title: "MongoDB Performance", Description: "Optimizing MongoDB", Author: "Alex Johnson", Publisher: "DataWorks", URL: "http://example.com/mongodb_performance", no_of_likes: 250 }
+]);
+
+// 2. Display All Documents
+db.Book.find().pretty();
+
+// 3. Display a List of Books Published by Each Publisher
+db.Book.aggregate([
+    {
+        $group: {
+            _id: "$Publisher",
+            books_published: { $sum: 1 }
+        }
+    }
+]);
+
+// 4. Get the Minimum of no_of_likes for Each Author
+db.Book.aggregate([
+    {
+        $group: {
+            _id: "$Author",
+            min_likes: { $min: "$no_of_likes" }
+        }
+    }
+]);
+
+// 5. Get the Maximum of no_of_likes for Each Author
+db.Book.aggregate([
+    {
+        $group: {
+            _id: "$Author",
+            max_likes: { $max: "$no_of_likes" }
+        }
+    }
+]);
