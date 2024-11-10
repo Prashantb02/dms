@@ -1,0 +1,45 @@
+DELIMITER $$
+
+-- Creating the stored procedure
+CREATE PROCEDURE update_and_track_detained_students()
+BEGIN
+    -- Declare the cursor to fetch students with attendance < 75%
+    DECLARE crsr_att CURSOR FOR 
+        SELECT roll_number, att FROM Stud WHERE att < 75;
+
+    -- Declare variables to hold fetched data
+    DECLARE mroll INT;
+    DECLARE matt INT;
+
+    -- Declare a handler for when the cursor has no more rows
+    DECLARE done BOOLEAN DEFAULT FALSE;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    -- Open the cursor
+    OPEN crsr_att;
+
+    -- Start the loop to process each row
+    read_loop: LOOP
+        -- Fetch each row into variables
+        FETCH crsr_att INTO mroll, matt;
+
+        -- Exit the loop if there are no more rows
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Update status to 'D' for detained students
+        UPDATE Stud SET status = 'D' WHERE roll_number = mroll;
+
+        -- Insert detained student details into d_stud table
+        INSERT INTO d_stud (roll_number, att) VALUES (mroll, matt);
+    END LOOP;
+
+    -- Close the cursor
+    CLOSE crsr_att;
+END$$
+
+DELIMITER ;
+
+-- Call the procedure
+CALL update_and_track_detained_students();
