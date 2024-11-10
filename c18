@@ -1,0 +1,86 @@
+<dependency>
+        <groupId>org.mongodb</groupId>
+        <artifactId>mongo-java-driver</artifactId>
+        <version>3.12.13</version>
+    </dependency>
+
+
+import com.mongodb.*;
+import org.bson.Document;
+
+public class Mongo {
+    public static void main(String[] args) {
+        try {
+            // Connect to MongoDB server
+            MongoClient mongoClient = new MongoClient("localhost", 27017);
+            DB db = mongoClient.getDB("test4");
+            System.out.println("Connected to database successfully");
+
+            // Create or get the collection
+            DBCollection collection = db.getCollection("mycol");
+            if (collection == null) {
+                collection = db.createCollection("mycol", new BasicDBObject());
+                System.out.println("Collection created successfully");
+            }
+
+            // 1. Insert a document with all required fields
+            BasicDBObject doc1 = new BasicDBObject();
+            doc1.put("title", "MongoDB");  // Ensure title is added
+            doc1.put("description", "NoSQL database");
+            doc1.put("likes", 100);
+            doc1.put("url", "http://www.mongodb.com/");
+            doc1.put("by", "MongoDB Org");
+
+            // Insert the document into the collection
+            collection.insert(doc1);
+            System.out.println("Document inserted successfully");
+
+            // 2. Retrieve all documents to verify insertion
+            System.out.println("Fetching all documents:");
+            DBCursor cursor = collection.find(); // Fetch all documents
+            int i = 1;
+            while (cursor.hasNext()) {
+                System.out.println("Document " + i + ": " + cursor.next());
+                i++;
+            }
+
+            // 3. Update a document - Change 'likes' to 200 where title is "MongoDB"
+            BasicDBObject newDocument = new BasicDBObject();
+            newDocument.put("likes", 200);  // Example: updating likes to 200
+
+            BasicDBObject searchQuery = new BasicDBObject();
+            searchQuery.put("title", "MongoDB");
+
+            collection.update(searchQuery, new BasicDBObject("$set", newDocument));
+            System.out.println("Document updated successfully");
+
+            // 4. Retrieve all documents after update
+            System.out.println("Fetching all documents after update:");
+            cursor = collection.find(); // Fetch all documents after update
+            i = 1;
+            while (cursor.hasNext()) {
+                System.out.println("Document " + i + ": " + cursor.next());
+                i++;
+            }
+
+            // 5. Delete the document with title "MongoDB"
+            BasicDBObject deleteQuery = new BasicDBObject();
+            deleteQuery.put("title", "MongoDB");
+
+            collection.remove(deleteQuery);
+            System.out.println("Document deleted successfully");
+
+            // 6. Retrieve all documents after deletion
+            System.out.println("Fetching all documents after deletion:");
+            cursor = collection.find(); // Fetch all documents after deletion
+            i = 1;
+            while (cursor.hasNext()) {
+                System.out.println("Document " + i + ": " + cursor.next());
+                i++;
+            }
+
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+    }
+}
