@@ -1,0 +1,42 @@
+CREATE TABLE customer (
+    customer_id INT PRIMARY KEY,
+    first_name VARCHAR(50)
+);
+
+INSERT INTO customer (customer_id, first_name) VALUES
+(1, 'Alice'),
+(2, 'Bob'),
+(3, 'Charlie');
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY,
+    amount DECIMAL(10, 2),
+    customer_id INT
+);
+
+INSERT INTO orders (order_id, amount, customer_id) VALUES
+(101, 250, 1),
+(102, 400, 2),
+(103, 150, 1),
+(104, 350, 4); -- This order has no matching customer
+SELECT c.customer_id, c.first_name, o.order_id, o.amount
+FROM customer c
+JOIN orders o ON c.customer_id = o.customer_id;
+SELECT c.customer_id, c.first_name, o.order_id, o.amount
+FROM customer c
+LEFT JOIN orders o ON c.customer_id = o.customer_id;
+SELECT c.customer_id, c.first_name, o.order_id, o.amount
+FROM customer c
+RIGHT JOIN orders o ON c.customer_id = o.customer_id;
+SELECT c.customer_id, c.first_name, o.order_id, o.amount
+FROM customer c
+LEFT JOIN orders o ON c.customer_id = o.customer_id
+
+UNION
+
+SELECT c.customer_id, c.first_name, o.order_id, o.amount
+FROM customer c
+RIGHT JOIN orders o ON c.customer_id = o.customer_id;
+SELECT a.customer_id AS customer1_id, a.first_name AS customer1_name,
+       b.customer_id AS customer2_id, b.first_name AS customer2_name
+FROM customer a, customer b
+WHERE a.customer_id != b.customer_id;
