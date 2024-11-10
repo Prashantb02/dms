@@ -1,0 +1,26 @@
+use yourDatabaseName; // Replace with your actual database name
+
+db.Bank.insertMany([
+    { cust_id: 1, cust_name: "Alice", branch: "Downtown", balance: 5000 },
+    { cust_id: 2, cust_name: "Bob", branch: "Uptown", balance: 7000 },
+    { cust_id: 3, cust_name: "Charlie", branch: "Downtown", balance: 3000 },
+    { cust_id: 4, cust_name: "David", branch: "Midtown", balance: 10000 },
+    { cust_id: 5, cust_name: "Eve", branch: "Uptown", balance: 1500 },
+    { cust_id: 6, cust_name: "Frank", branch: "Downtown", balance: 8000 }
+]);
+
+var mapFunction = function() {
+    emit(this.branch, this.balance);
+};
+
+var reduceFunction = function(branch, balances) {
+    return Array.sum(balances);
+};
+
+db.Bank.mapReduce(
+    mapFunction,
+    reduceFunction,
+    { out: "branch_total_balance" }
+);
+
+db.branch_total_balance.find().pretty();
