@@ -22,50 +22,58 @@ INSERT INTO O_RollCall VALUES (201, 'John');
 INSERT INTO O_RollCall VALUES (202, 'Emily');
 INSERT INTO O_RollCall VALUES (101, 'Alice'); -- Existing entry
 DECLARE
-    -- Parameterized cursor to check if a student already exists in O_RollCall
-    CURSOR cur_check_exists(p_name VARCHAR2) IS
-        SELECT roll_number
-        FROM O_RollCall
-        WHERE name = p_name;
-    
     -- Cursor to loop through all records in N_RollCall
     CURSOR cur_n_rollcall IS
         SELECT roll_number, name
         FROM N_RollCall;
 
+    -- Parameterized cursor to check if a student already exists in O_RollCall
+    CURSOR cur_check_exists(p_name VARCHAR2) IS
+        SELECT roll_number
+        FROM O_RollCall
+        WHERE name = p_name;
+
+    -- Variables to hold data from N_RollCall
     v_roll_number N_RollCall.roll_number%TYPE;
     v_name N_RollCall.name%TYPE;
-    v_existing_roll O_RollCall.roll_number%TYPE;
 
+    -- Variable to store existing roll number from O_RollCall if found
+    v_existing_roll O_RollCall.roll_number%TYPE;
 BEGIN
     -- Open the cursor for N_RollCall table to begin processing each row
     OPEN cur_n_rollcall;
-    
+
     LOOP
         -- Fetch the current row from N_RollCall
         FETCH cur_n_rollcall INTO v_roll_number, v_name;
-        
+
         -- Exit the loop if there are no more rows
         EXIT WHEN cur_n_rollcall%NOTFOUND;
 
-        -- Open the check cursor to see if this record exists in O_RollCall
+        -- Check if this record already exists in O_RollCall using parameterized cursor
         OPEN cur_check_exists(v_name);
         FETCH cur_check_exists INTO v_existing_roll;
 
         IF cur_check_exists%FOUND THEN
-            -- Record already exists, so skip it
+            -- If record exists, display a message
             DBMS_OUTPUT.PUT_LINE('Record for ' || v_name || ' already exists in O_RollCall.');
         ELSE
-            -- Record does not exist, insert it into O_RollCall
+            -- If record does not exist, insert it
             INSERT INTO O_RollCall (roll_number, name) VALUES (v_roll_number, v_name);
             DBMS_OUTPUT.PUT_LINE('Inserted record for ' || v_name || ' into O_RollCall.');
         END IF;
-        
-        -- Close the check cursor
+
+        -- Close the parameterized cursor after each check
         CLOSE cur_check_exists;
     END LOOP;
 
     -- Close the main cursor
+    CLOSE cur_n_rollcall;
+
+    DBMS_OUTPUT.PUT_LINE('Data merge process completed.');
+END;
+/
+
     CLOSE cur_n_rollcall;
 
     DBMS_OUTPUT.PUT_LINE('Data merge process completed.');
