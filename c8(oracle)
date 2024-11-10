@@ -1,0 +1,60 @@
+-- Creating Stud_Marks table
+CREATE TABLE Stud_Marks (
+    roll_no INT PRIMARY KEY,
+    name VARCHAR(100),
+    total_marks INT
+);
+
+-- Creating Result table
+CREATE TABLE Result (
+    roll_no INT,
+    name VARCHAR(100),
+    class VARCHAR(50)
+);
+-- Inserting sample data into Stud_Marks table
+INSERT INTO Stud_Marks (roll_no, name, total_marks) VALUES
+(101, 'Alice', 1200),
+(102, 'Bob', 980),
+(103, 'Charlie', 850),
+(104, 'Daisy', 780),
+(105, 'Eve', 1010);
+CREATE OR REPLACE PROCEDURE proc_grade(
+    temp IN NUMBER,                                -- Input parameter: Roll number
+    p_roll_no OUT Stud_Marks.roll_no%TYPE,         -- Output parameter: Roll number
+    p_name OUT Stud_Marks.name%TYPE,               -- Output parameter: Student name
+    p_total OUT Stud_Marks.total_marks%TYPE        -- Output parameter: Total marks
+) AS
+BEGIN
+    -- Fetch the student's details based on roll number
+    SELECT name, total_marks, roll_no
+    INTO p_name, p_total, p_roll_no
+    FROM Stud_Marks
+    WHERE roll_no = temp;
+
+    -- Determine the class based on total marks and insert into Result table
+    IF p_total BETWEEN 990 AND 1500 THEN
+        INSERT INTO Result VALUES (p_roll_no, p_name, 'distinction');
+    ELSIF p_total BETWEEN 900 AND 989 THEN
+        INSERT INTO Result VALUES (p_roll_no, p_name, 'first class');
+    ELSIF p_total BETWEEN 825 AND 899 THEN
+        INSERT INTO Result VALUES (p_roll_no, p_name, 'HSC');
+    ELSE
+        INSERT INTO Result VALUES (p_roll_no, p_name, 'fail');
+    END IF;
+
+-- Exception Handling
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Roll no ' || temp || ' not found');
+END proc_grade;
+/
+DECLARE
+    temp NUMBER(20);                                   -- Variable to hold input roll number
+    p_roll_no Stud_Marks.roll_no%TYPE;                 -- Variable to hold output roll number
+    p_name Stud_Marks.name%TYPE;                       -- Variable to hold output name
+    p_total Stud_Marks.total_marks%TYPE;               -- Variable to hold output total marks
+BEGIN
+    temp := &temp;                                     -- Prompt user for roll number input
+    proc_grade(temp, p_roll_no, p_name, p_total);      -- Call procedure with input and output parameters
+END;
+/
