@@ -1,19 +1,41 @@
+-- Create the Stud table
+CREATE TABLE Stud (
+    roll_number integer,
+    att integer,
+    status VARCHAR(25)
+);
+
+-- Create the d_stud table to track detained students
+CREATE TABLE d_stud (
+    roll_number integer,
+    att integer
+);
+INSERT INTO Stud (roll_number, att, status) VALUES (1001, 80, NULL);
+INSERT INTO Stud (roll_number, att, status) VALUES (1002, 70, NULL);
+INSERT INTO Stud (roll_number, att, status) VALUES (1003, 65, NULL);
+INSERT INTO Stud (roll_number, att, status) VALUES (1004, 90, NULL);
+INSERT INTO Stud (roll_number, att, status) VALUES (1005, 60, NULL);
 DELIMITER $$
 
--- Creating the stored procedure
 CREATE PROCEDURE update_and_track_detained_students()
 BEGIN
-    -- Declare the cursor to fetch students with attendance < 75%
-    DECLARE crsr_att CURSOR FOR 
-        SELECT roll_number, att FROM Stud WHERE att < 75;
-
     -- Declare variables to hold fetched data
     DECLARE mroll INT;
     DECLARE matt INT;
 
     -- Declare a handler for when the cursor has no more rows
     DECLARE done BOOLEAN DEFAULT FALSE;
+
+    -- Declare the cursor to fetch students with attendance < 75%
+    DECLARE crsr_att CURSOR FOR 
+        SELECT roll_number, att FROM temp_detained_students;
+
+    -- Set up the handler for when the cursor has no more rows
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    -- Create a temporary table to hold students with attendance < 75%
+    CREATE TEMPORARY TABLE temp_detained_students AS
+        SELECT roll_number, att FROM Stud WHERE att < 75;
 
     -- Open the cursor
     OPEN crsr_att;
@@ -37,6 +59,9 @@ BEGIN
 
     -- Close the cursor
     CLOSE crsr_att;
+
+    -- Drop the temporary table
+    DROP TEMPORARY TABLE temp_detained_students;
 END$$
 
 DELIMITER ;
